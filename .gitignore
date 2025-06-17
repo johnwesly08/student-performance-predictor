@@ -1,0 +1,22 @@
+# Ignore virtual environments
+ml_env/
+venv/
+env/
+
+# Bytecode and Python cache files
+__pycache__/
+*.py[cod]
+
+# Jupyter notebook checkpoint files
+.ipynb_checkpoints/
+
+# VSCode or PyCharm settings (optional)
+.vscode/
+.idea/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore installed packages (just use requirements.txt)
+*.egg-info/
