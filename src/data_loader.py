@@ -1,9 +1,14 @@
 import pandas as pd
+import logging
 
-def load_data(filepath):
+logging.basicConfig(level=logging.INFO)
+
+def load_data(file: str) -> pd.DataFrame:
     try:
-        data = pd.read_csv(filepath)
-        return data
+        logging.info(f"Loading data from {file_path}")
+        df = pd.read_csv(file_path)
+        logging.info(f"Data loaded successfully with shape {df.shape}")
+        return df
     except Exception as e:
-        print(f"Error loading data: {e}")
-        return None
+        logging.error(f"Error loading data: {e}")
+        raise
