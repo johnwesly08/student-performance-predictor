@@ -1,0 +1,12 @@
+paths:
+  raw_data: data/raw/student_data.csv
+  test_data: data/raw/test_input.csv
+  processed: data/processed/
+  model_path: models/student_model.joblib
+
+model:
+  type: LinearRegression
+  test_size: 0.2
+  random_state: 42
+  target: final_score
+  metrics: [r2_score, mean_absolute_error]

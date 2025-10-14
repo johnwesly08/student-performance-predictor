@@ -1,3 +1,4 @@
+from src.utils.config_loader import load_config
 from src.data_loader import load_data
 from src.preprocessing import preprocess_data
 from sklearn.linear_model import LinearRegression
@@ -8,6 +9,9 @@ import argparse
 
 
 logging.basicConfig(level=logging.INFO)
+
+# Load config
+cfg = load_config()
 
 def train_and_save_model(data_path: str, model_path:str = "models/student_model.joblib"):
     df = load_data(data_path)
