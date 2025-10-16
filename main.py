@@ -42,27 +42,69 @@ def visualize_data(data_path):
 
 
 def visualize_regression(model_path, data_path):
-    model = load(model_path)
-    df =pd.read_csv(data_path)
-    x_col = "Hours" if "Hours" in df.columns else df.columns[0]
-    y_col = "Scores" if "Scores" in df.columns else df.columns[-1]
-
-    X = df[[x_col]]
-    y = df[y_col]
-
-    #line = model.coef_ * X + model.intercept_
-    X_sorted = X.sort_values(by=x_col)
-    line = model.predict(X_sorted)
-
-    plt.figure(figsize=(8,5))
-    plt.scatter(X,y, color="green", label = "Training Data")
-    plt.plot(X, line, color="red", label="Regression Line")
-    plt.title("Linear Regression Fit")
-    plt.xlabel(x_col)
-    plt.ylabel(y_col)
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    try:
+        model = load(model_path)
+        df = pd.read_csv(data_path)
+        
+        print(f"🔍 Data features: {df.columns.tolist()}")
+        
+        # Get the feature names the model was trained with
+        if hasattr(model, 'feature_names_in_'):
+            expected_features = model.feature_names_in_
+        else:
+            # If model doesn't have feature names, use common ones
+            expected_features = ['study_hours', 'attendance']
+        
+        print(f"Model expects: {expected_features}")
+        
+        # Check if all expected features are present
+        missing_features = set(expected_features) - set(df.columns)
+        if missing_features:
+            print(f"Missing features: {missing_features}")
+            print("Available features:", df.columns.tolist())
+            
+            # Try to use only available features
+            available_features = [f for f in expected_features if f in df.columns]
+            if not available_features:
+                print("No common features found. Cannot visualize.")
+                return
+            
+            print(f"Using available features: {available_features}")
+            X = df[available_features]
+            x_col = available_features[0]
+        else:
+            X = df[expected_features]
+            x_col = expected_features[0]
+        
+        y_col = "final_score" if "final_score" in df.columns else df.columns[-1]
+        
+        if y_col not in df.columns:
+            print(f"Target column '{y_col}' not found in data")
+            return
+        
+        y = df[y_col]
+        
+        # Sort for smooth plotting
+        X_sorted = X.sort_values(by=x_col)
+        line = model.predict(X_sorted)
+        
+        # Create visualization
+        plt.figure(figsize=(10, 6))
+        plt.scatter(X[x_col], y, color='blue', alpha=0.7, label='Actual Data')
+        plt.plot(X_sorted[x_col], line, color='red', linewidth=2, label='Regression Line')
+        plt.title(f'Regression: {x_col} vs {y_col}')
+        plt.xlabel(x_col)
+        plt.ylabel(y_col)
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        plt.tight_layout()
+        plt.show()
+        
+        print("Visualization completed successfully")
+        
+    except Exception as e:
+        print(f"Visualization failed: {str(e)}")
+        logging.error(f"Visualization error: {str(e)}")
 
 def save_metrics(metrics: dict):
     os.makedirs("logs", exist_ok=True)
@@ -74,6 +116,24 @@ def save_metrics(metrics: dict):
         df.to_csv(metrics_file, index=False)
     else:
         df.to_csv(metrics_file, mode="a", header=False, index =False)
+
+
+def debug_data_issue():
+    train_path = cfg["paths"]["raw_data"]
+    if os.path.exists(train_path):
+        train_df = pd.read_csv(train_path)
+        print(f"Training data features: {train_df.columns.tolist()}")
+        print(f"Training data shape: {train_df.shape}")
+        print(f"Dirst few rows: {train_df.head()}")
+
+    model_path = cfg["paths"]["model_path"]
+    if os.path.exists(model_path):
+        model = load(model_path)
+        if hasattr(model, 'feature_names_in_'):
+            print(f"Model expects features: {model.feature_names_in_}")
+        else:
+            print("Model has no feature names stored")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Student Marks Prediction ML Pipeline")
