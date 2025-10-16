@@ -1,4 +1,4 @@
-# 🎓 Student Marks Prediction Model
+# 🎓 Student Performance Predictor
 
 A comprehensive machine learning pipeline to predict students' final scores based on study hours and attendance patterns. Built with modularity, scalability, and production-readiness in mind.
 
