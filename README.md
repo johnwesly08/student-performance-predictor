@@ -23,8 +23,8 @@ A comprehensive machine learning pipeline to predict students' final scores base
 
 1. **Clone and setup environment**:
 ```bash
-git clone https://github.com/johnwesly08/student_marks_predict_model.git
-cd student_marks_predict_model
+git clone https://github.com/johnwesly08/student-performance-predictor.git
+cd student-performance-predictor
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
