@@ -1,7 +1,7 @@
 # 🎓 Student Performance Predictor
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![Python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)
 
@@ -200,7 +200,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Built with Scikit-learn, Pandas, and Matplotlib
 - Inspired by educational data mining research
-```
+  
 
 ## Key Improvements Made:
 
@@ -218,3 +218,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ```bash
 pip freeze > requirements.txt
 ```
+
+
+## 🧭 7. Enhancements for the Future
+
+| Feature | Why It’s Useful |
+|----------|----------------|
+| **Dockerfile** | Makes the project runnable anywhere |
+| **FastAPI / Flask API** | Convert it into a web service for predictions |
+| **CI/CD via GitHub Actions** | Auto-run tests when you push updates |
+| **Data Versioning (DVC)** | Track dataset changes |
+| **Experiment Tracking (MLflow)** | Manage model versions and performance metrics |
+| **Jupyter Notebook** | Add a notebook for EDA and presentation |
+
+
