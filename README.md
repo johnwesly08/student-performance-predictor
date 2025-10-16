@@ -1,5 +1,10 @@
 # 🎓 Student Performance Predictor
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)
+
 A comprehensive machine learning pipeline to predict students' final scores based on study hours and attendance patterns. Built with modularity, scalability, and production-readiness in mind.
 
 ---
