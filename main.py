@@ -8,14 +8,14 @@ from datetime import datetime
 from joblib import load
 from src.model import train_and_save_model
 from src.predictor import predict_from_file
+import numpy as np
 
-
-os.makedirs("logs",exist_ok=True)
+os.makedirs("logs", exist_ok=True)
 
 logging.basicConfig(
-    filename = "logs/run.log",
-    level = logging.INFO,
-    format = "%(asctime)s - %(levelname)s - %(message)s"
+    filename="logs/run.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 console_handler = logging.StreamHandler()
@@ -29,82 +29,86 @@ cfg = load_config()
 
 def visualize_data(data_path):
     df = pd.read_csv(data_path)
-    x_col = "Hours" if "Hours" in df.columns else df.columns[0]
-    y_col = "Scores" if "Scores" in df.columns else df.columns[-1]
-
-    plt.figure(figsize = (8,5))
-    plt.scatter(df[x_col],df[y_col], color = "blue", label = "Actual data")
-    plt.title(f"{x_col} vs {y_col}")
-    plt.xlabel(x_col)
-    plt.ylabel(y_col)
-    plt.grid(True)
+    
+    # Create subplots for each feature vs target
+    fig, axes = plt.subplots(1, 2, figsize=(15, 5))
+    
+    # Plot study_hours vs final_score
+    if 'study_hours' in df.columns and 'final_score' in df.columns:
+        axes[0].scatter(df['study_hours'], df['final_score'], color='blue', alpha=0.7)
+        axes[0].set_title('Study Hours vs Final Score')
+        axes[0].set_xlabel('Study Hours')
+        axes[0].set_ylabel('Final Score')
+        axes[0].grid(True)
+    
+    # Plot attendance vs final_score
+    if 'attendance' in df.columns and 'final_score' in df.columns:
+        axes[1].scatter(df['attendance'], df['final_score'], color='green', alpha=0.7)
+        axes[1].set_title('Attendance vs Final Score')
+        axes[1].set_xlabel('Attendance (%)')
+        axes[1].set_ylabel('Final Score')
+        axes[1].grid(True)
+    
+    plt.tight_layout()
     plt.show()
 
-
 def visualize_regression(model_path, data_path):
-    try:
-        model = load(model_path)
-        df = pd.read_csv(data_path)
+    model = load(model_path)
+    df = pd.read_csv(data_path)
+    
+    # Get the feature names the model was trained with
+    if hasattr(model, 'feature_names_in_'):
+        feature_names = model.feature_names_in_
+        logging.info(f"Model expects features: {list(feature_names)}")
+    else:
+        # Assume the model was trained on study_hours and attendance
+        feature_names = ['study_hours', 'attendance']
+    
+    # Check if all required features are present
+    missing_features = set(feature_names) - set(df.columns)
+    if missing_features:
+        logging.error(f"Missing features in data: {missing_features}")
+        logging.error("Cannot visualize regression - feature mismatch")
+        return
+    
+    X = df[feature_names]
+    y_col = "final_score" if "final_score" in df.columns else df.columns[-1]
+    y = df[y_col]
+    
+    # Create predictions for the actual data points
+    y_pred = model.predict(X)
+    
+    # Create subplots for each feature
+    n_features = len(feature_names)
+    fig, axes = plt.subplots(1, n_features, figsize=(5*n_features, 5))
+    
+    if n_features == 1:
+        axes = [axes]  # Make it iterable
+    
+    for i, feature in enumerate(feature_names):
+        # Sort by current feature for smooth lines
+        sorted_indices = np.argsort(X[feature])
+        x_sorted = X[feature].iloc[sorted_indices]
+        y_actual_sorted = y.iloc[sorted_indices]
+        y_pred_sorted = y_pred[sorted_indices]
         
-        print(f"🔍 Data features: {df.columns.tolist()}")
-        
-        # Get the feature names the model was trained with
-        if hasattr(model, 'feature_names_in_'):
-            expected_features = model.feature_names_in_
-        else:
-            # If model doesn't have feature names, use common ones
-            expected_features = ['study_hours', 'attendance']
-        
-        print(f"Model expects: {expected_features}")
-        
-        # Check if all expected features are present
-        missing_features = set(expected_features) - set(df.columns)
-        if missing_features:
-            print(f"Missing features: {missing_features}")
-            print("Available features:", df.columns.tolist())
-            
-            # Try to use only available features
-            available_features = [f for f in expected_features if f in df.columns]
-            if not available_features:
-                print("No common features found. Cannot visualize.")
-                return
-            
-            print(f"Using available features: {available_features}")
-            X = df[available_features]
-            x_col = available_features[0]
-        else:
-            X = df[expected_features]
-            x_col = expected_features[0]
-        
-        y_col = "final_score" if "final_score" in df.columns else df.columns[-1]
-        
-        if y_col not in df.columns:
-            print(f"Target column '{y_col}' not found in data")
-            return
-        
-        y = df[y_col]
-        
-        # Sort for smooth plotting
-        X_sorted = X.sort_values(by=x_col)
-        line = model.predict(X_sorted)
-        
-        # Create visualization
-        plt.figure(figsize=(10, 6))
-        plt.scatter(X[x_col], y, color='blue', alpha=0.7, label='Actual Data')
-        plt.plot(X_sorted[x_col], line, color='red', linewidth=2, label='Regression Line')
-        plt.title(f'Regression: {x_col} vs {y_col}')
-        plt.xlabel(x_col)
-        plt.ylabel(y_col)
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
-        plt.show()
-        
-        print("Visualization completed successfully")
-        
-    except Exception as e:
-        print(f"Visualization failed: {str(e)}")
-        logging.error(f"Visualization error: {str(e)}")
+        axes[i].scatter(x_sorted, y_actual_sorted, color='blue', alpha=0.7, label='Actual')
+        axes[i].plot(x_sorted, y_pred_sorted, color='red', linewidth=2, label='Predicted')
+        axes[i].set_title(f'Regression: {feature} vs {y_col}')
+        axes[i].set_xlabel(feature)
+        axes[i].set_ylabel(y_col)
+        axes[i].legend()
+        axes[i].grid(True)
+    
+    plt.tight_layout()
+    plt.show()
+    
+    # Print model coefficients for interpretation
+    if hasattr(model, 'coef_'):
+        logging.info("Model coefficients:")
+        for i, feature in enumerate(feature_names):
+            logging.info(f"  {feature}: {model.coef_[i]:.4f}")
+        logging.info(f"Intercept: {model.intercept_:.4f}")
 
 def save_metrics(metrics: dict):
     os.makedirs("logs", exist_ok=True)
@@ -115,31 +119,13 @@ def save_metrics(metrics: dict):
     if not os.path.exists(metrics_file):
         df.to_csv(metrics_file, index=False)
     else:
-        df.to_csv(metrics_file, mode="a", header=False, index =False)
-
-
-def debug_data_issue():
-    train_path = cfg["paths"]["raw_data"]
-    if os.path.exists(train_path):
-        train_df = pd.read_csv(train_path)
-        print(f"Training data features: {train_df.columns.tolist()}")
-        print(f"Training data shape: {train_df.shape}")
-        print(f"Dirst few rows: {train_df.head()}")
-
-    model_path = cfg["paths"]["model_path"]
-    if os.path.exists(model_path):
-        model = load(model_path)
-        if hasattr(model, 'feature_names_in_'):
-            print(f"Model expects features: {model.feature_names_in_}")
-        else:
-            print("Model has no feature names stored")
-
+        df.to_csv(metrics_file, mode="a", header=False, index=False)
 
 def main():
     parser = argparse.ArgumentParser(description="Student Marks Prediction ML Pipeline")
-    parser.add_argument("--mode", required = True, choices = ["train", "predict"], help = "Select mode: train or predict")
+    parser.add_argument("--mode", required=True, choices=["train", "predict"], help="Select mode: train or predict")
     parser.add_argument("--file", help="Path to dataset (for training or prediction)")
-    parser.add_argument("--plot", action = "store_true", help = "Enable visualization of data or regression line")
+    parser.add_argument("--plot", action="store_true", help="Enable visualization of data or regression line")
     args = parser.parse_args()
 
     if args.mode == "train":
@@ -161,13 +147,13 @@ def main():
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
-        r2 = r2_score(y_test,y_pred)
-        mae = mean_absolute_error(y_test,y_pred)
+        r2 = r2_score(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
         logging.info(f"R2 Score: {r2:.4f}")
-        logging.info(f" MAE: {mae:.2f}")
+        logging.info(f"MAE: {mae:.2f}")
 
-        model_path =  cfg["paths"]["model_path"]
-        os.makedirs(os.path.dirname(model_path), exist_ok = True)
+        model_path = cfg["paths"]["model_path"]
+        os.makedirs(os.path.dirname(model_path), exist_ok=True)
         dump(model, model_path)
         logging.info(f"Model saved to {model_path}")
 

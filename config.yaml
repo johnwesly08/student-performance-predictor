@@ -1,6 +1,6 @@
 paths:
   raw_data: data/raw/student_data.csv
-  test_data: data/raw/test_input.csv
+  test_data: data/raw/student_test_input.csv
   processed: data/processed/
   model_path: models/student_model.joblib
 
