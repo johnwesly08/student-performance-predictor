@@ -130,17 +130,17 @@ paths:
 
 ### Training Data (`student_data.csv`)
 ```csv
-study_hours,attendance,final_score
-5,80,75
-8,90,88
-2,60,50
+study_hours, attendance, final_score
+5, 80, 75
+8, 90, 88
+2, 60, 50
 ```
 
 ### Prediction Input (`student_test_input.csv`)
 ```csv
-study_hours,attendance,final_score
-6,80,72
-9,92,90
+study_hours, attendance, final_score
+6, 80, 72
+9, 92, 90
 ```
 
 ---
@@ -187,7 +187,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Authors
 
-- **Your Name** - Initial work - [YourGitHub](https://github.com/your-username)
+- **John Wesly P D** - Initial work - [johnwesly08](https://github.com/johnwesly08)
 
 ---
 
