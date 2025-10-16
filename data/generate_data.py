@@ -19,6 +19,7 @@ def generate_datasets():
     test_data = {
         "study_hours": [6, 9, 3, 8],
         "attendance": [80, 92, 70, 88],
+        "final_score": [72, 90, 58, 85]
     }
     test_df = pd.DataFrame(test_data)
     test_df.to_csv("data/raw/student_test_input.csv", index=False)
